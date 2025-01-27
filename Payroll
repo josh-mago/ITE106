@@ -1,0 +1,129 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+
+public class PayrollSystem {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Payroll System");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 500);
+
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+        JTextField idField = new JTextField();
+        JTextField nameField = new JTextField();
+        JTextField hourlyRateField = new JTextField();
+        JTextField hoursWorkedField = new JTextField();
+
+        inputPanel.add(new JLabel("Employee ID:"));
+        inputPanel.add(idField);
+        inputPanel.add(new JLabel("Name:"));
+        inputPanel.add(nameField);
+        inputPanel.add(new JLabel("Hourly Rate:"));
+        inputPanel.add(hourlyRateField);
+        inputPanel.add(new JLabel("Hours Worked:"));
+        inputPanel.add(hoursWorkedField);
+
+        panel.add(inputPanel, BorderLayout.NORTH);
+
+        JTextArea outputArea = new JTextArea();
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 4, 10, 10));
+        JButton addButton = new JButton("Add Employee");
+        JButton calculateButton = new JButton("Calculate Pay");
+        JButton saveButton = new JButton("Save Record");
+        JButton displayButton = new JButton("Display Records");
+
+        buttonPanel.add(addButton);
+        buttonPanel.add(calculateButton);
+        buttonPanel.add(saveButton);
+        buttonPanel.add(displayButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String id = idField.getText().trim();
+                String name = nameField.getText().trim();
+                String hourlyRate = hourlyRateField.getText().trim();
+                String hoursWorked = hoursWorkedField.getText().trim();
+
+                if (!id.isEmpty() && !name.isEmpty() && !hourlyRate.isEmpty() && !hoursWorked.isEmpty()) {
+                    outputArea.setText("Employee Added:\n" +
+                            "ID: " + id + "\n" +
+                            "Name: " + name + "\n" +
+                            "Hourly Rate: " + hourlyRate + "\n" +
+                            "Hours Worked: " + hoursWorked);
+                } else {
+                    outputArea.setText("Please fill in all fields.");
+                }
+            }
+        });
+
+        calculateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    double hourlyRate = Double.parseDouble(hourlyRateField.getText().trim());
+                    double hoursWorked = Double.parseDouble(hoursWorkedField.getText().trim());
+                    double grossPay = hourlyRate * hoursWorked;
+                    double netPay = grossPay - (grossPay * 0.2);
+
+                    outputArea.setText("Gross Pay: " + grossPay + "\nNet Pay: " + netPay);
+                } catch (NumberFormatException ex) {
+                    outputArea.setText("Invalid input for hourly rate or hours worked.");
+                }
+            }
+        });
+
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("payroll.txt", true))) {
+                    String id = idField.getText().trim();
+                    String name = nameField.getText().trim();
+                    String hourlyRate = hourlyRateField.getText().trim();
+                    String hoursWorked = hoursWorkedField.getText().trim();
+
+                    if (!id.isEmpty() && !name.isEmpty() && !hourlyRate.isEmpty() && !hoursWorked.isEmpty()) {
+                        double grossPay = Double.parseDouble(hourlyRate) * Double.parseDouble(hoursWorked);
+                        double netPay = grossPay - (grossPay * 0.2);
+
+                        writer.write("ID: " + id + ", Name: " + name + ", Gross Pay: " + grossPay + ", Net Pay: " + netPay);
+                        writer.newLine();
+                        outputArea.setText("Record saved.");
+                    } else {
+                        outputArea.setText("Please fill in all fields before saving.");
+                    }
+                } catch (IOException | NumberFormatException ex) {
+                    outputArea.setText("Error saving record.");
+                }
+            }
+        });
+
+        displayButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try (BufferedReader reader = new BufferedReader(new FileReader("payroll.txt"))) {
+                    StringBuilder records = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        records.append(line).append("\n");
+                    }
+                    outputArea.setText(records.toString());
+                } catch (IOException ex) {
+                    outputArea.setText("Error reading records.");
+                }
+            }
+        });
+
+        frame.add(panel);
+        frame.setVisible(true);
+    }
+}
