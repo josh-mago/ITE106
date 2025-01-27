@@ -1,0 +1,98 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+
+public class Phonebook {
+    private static HashMap<String, String> phonebook = new HashMap<>();
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Phonebook System");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(500, 400);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+
+        JPanel inputPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JTextField nameField = new JTextField();
+        JTextField numberField = new JTextField();
+        inputPanel.add(new JLabel("Name:"));
+        inputPanel.add(nameField);
+        inputPanel.add(new JLabel("Phone Number:"));
+        inputPanel.add(numberField);
+        panel.add(inputPanel, BorderLayout.NORTH);
+
+        JTextArea displayArea = new JTextArea();
+        displayArea.setEditable(false);
+        panel.add(new JScrollPane(displayArea), BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 4, 10, 10));
+        JButton addButton = new JButton("Add");
+        JButton deleteButton = new JButton("Delete");
+        JButton searchButton = new JButton("Search");
+        JButton updateButton = new JButton("Update");
+        buttonPanel.add(addButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(searchButton);
+        buttonPanel.add(updateButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = nameField.getText().trim();
+                String number = numberField.getText().trim();
+                if (!name.isEmpty() && !number.isEmpty()) {
+                    phonebook.put(name, number);
+                    displayArea.setText("Contact Added: " + name + " - " + number);
+                } else {
+                    displayArea.setText("Please enter both name and number.");
+                }
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = nameField.getText().trim();
+                if (phonebook.containsKey(name)) {
+                    phonebook.remove(name);
+                    displayArea.setText("Contact Deleted: " + name);
+                } else {
+                    displayArea.setText("Contact not found.");
+                }
+            }
+        });
+
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = nameField.getText().trim();
+                if (phonebook.containsKey(name)) {
+                    displayArea.setText("Contact Found: " + name + " - " + phonebook.get(name));
+                } else {
+                    displayArea.setText("Contact not found.");
+                }
+            }
+        });
+
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = nameField.getText().trim();
+                String number = numberField.getText().trim();
+                if (phonebook.containsKey(name)) {
+                    phonebook.put(name, number);
+                    displayArea.setText("Contact Updated: " + name + " - " + number);
+                } else {
+                    displayArea.setText("Contact not found. Please add it first.");
+                }
+            }
+        });
+
+        frame.add(panel);
+        frame.setVisible(true);
+    }
+}
